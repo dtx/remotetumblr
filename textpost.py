@@ -1,10 +1,12 @@
+import argparse
 import glob
 import json
 import os
-import  time
+import time
 import urllib2
 import urlparse
 import oauth2
+import reqBody
 from poster.encode import multipart_encode
 from poster.streaminghttp import register_openers
 
@@ -54,6 +56,24 @@ class TumblrAPIv2:
 
         return self.parse_response(respdata)
 
+#Set up the CLI environment.
+parser = argparse.ArgumentParser(description='Tumblr API for Pythonrunners! ^^')
+parser.add_argument('filename', metavar='FILEMASK', type=str,
+        help='a filepath to read the data from')
+parser.add_argument('-t', dest='type', help='The type of the post, text/photo, defaults to text',
+       default='text')
+parser.add_argument('-s', dest='state', help='The state of the post, can be published, draft or queue. Defaults to publish.',
+        default='published')
+parser.add_argument('-g', dest='tags', help="A string of comma seperated tags wrapped in quotes, eg: 'tags, helpers, taggers'")
+parser.add_argument('-w', dest='tweet', help='Text to tweet, or off to disable default set on Tumblr.')
+parser.add_argument('-m', dest='markdown', default= 'false', help='Set if provided text post is markdown, set to false by default')
+args = parser.parse_args()
+#TODO: Add a checker to check the validity of args
+
+#make the basic request body
+bodymaker = reqBody.reqBodyMaker()
+post1= bodymaker.makeBody(args)
+
 register_openers()
 
 CONSUMER_KEY = 'KOh8sy3TRszyliDMOMxbTga6Il9tDcrQ3l7FYUt5TgjG7dMDzF'
@@ -61,32 +81,34 @@ CONSUMER_SECRET = 'c7XCB7TcQ9duEkHPxotb24d7GYUXRxZ5qaQXwBvs0sJhKoKSTP'
 OAUTH_TOKEN = 'qcHD4Y5BtB8AvaAYl0XQIcrJJ0gxIGnynkAMoPh6uFyvmQPL1S'
 OAUTH_TOKEN_SECRET = 'zjqix3Ce2aTdOoIvnacPCfRLyh0rgKxJ1GMPM1G9GR6oHqY0rZ'
 
-DIR = '/Users/dsanghani/remotetumblr/'
-FILE_MASK = 'draft.txt'
+#TODO: DIR should be set to the current directory
+DIR = '/Users/dsanghani/git/remotetumblr/'
+FILE_MASK = args.filename
 BLOG = 'dtx4.tumblr.com'
 
 
 api = TumblrAPIv2(CONSUMER_KEY, CONSUMER_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
-
-for img in glob.glob( os.path.join(DIR, FILE_MASK) ):
+for img in glob.glob(os.path.join(DIR, FILE_MASK)):
 
     date  = time.gmtime(os.path.getmtime(img))
     post = {
-        'type' : 'text',
-        'state' : 'draft',
-        'date' : time.strftime ("%Y-%m-%d %H:%M:%S", date),
-        'body' : img,
-        'tags' : time.strftime ("%Y", date) + ", photo",
-        'title': 'yaya'
+        'type': args.type,
+        'state': 'draft',
+        'date': time.strftime("%Y-%m-%d %H:%M:%S", date),
+        'body': img,
+        'tags': time.strftime("%Y", date) + ", photo",
+        'title': 'yaya1'
     }
 
+
     try:
-        response = api.createPhotoPost(BLOG,post)
-        if 'id' in response:
-            print response['id']
-        else:
-            print response
-            break
+        print 'Sending data'
+        #response = api.createPhotoPost(BLOG,post)
+        #if 'id' in response:
+        #   print response['id']
+        #else:
+        #   print response
+        #   break
 
     except APIError:
         print "Error"
