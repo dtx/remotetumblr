@@ -1,6 +1,6 @@
 remotetumblr
 ============
-###Fork and contribute if you want, currently not usable###
+####Fork and contribute if you want, currently not usable, working on it :)#####
 TumblrV2 API for posting in Python, for easier remote posting without having to log in everytime.
 
 This is cirrently under development, and I will try to apply document-as-you-go as I develop and enhance the components.
